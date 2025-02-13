@@ -8,18 +8,31 @@ from pyrogram.emoji import CLOWN_FACE
 from src.config import CLOWN_ID
 
 
+def is_censored_text(text: str) -> bool:
+    """True, если нельзя ставить клоуна"""
+    if text is None:
+        return False
+    if all(not symbol.isalpha() for symbol in text):
+        return False
+
+    if all((symbol in "zv" or not symbol.isalpha() for symbol in text.strip().lower())):
+        logging.info("Is ZV")
+        return True
+    if "росси" in text.strip().lower():
+        logging.info("About Russian")
+        return True
+    if "путин" in text.strip().lower():
+        logging.info("About Putin")
+        return True
+    return False
+
+
 async def post_clown(bot: Client, message: Message) -> None:
     logging.info(f"got message from {message.from_user.id}")
     if message.from_user.id != int(CLOWN_ID):
         return
-    if message.text is not None:
-        if all((symbol in "zv" or not symbol.isalpha() or symbol.isdigit() for symbol in message.text.strip().lower())):
-            return logging.info("Is ZV") and None
-        if "росси" in message.text.strip().lower():
-            return logging.info("About Russian") and None
-        if "путин" in message.text.strip().lower():
-            return logging.info("About Putin") and None
-
+    if is_censored_text(message.text):
+        return
     logging.info(f"{message.from_user.id} is a clown")
     await message.react(emoji=CLOWN_FACE)
 
