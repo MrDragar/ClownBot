@@ -61,10 +61,12 @@ async def post_clown(bot: Client, message: Message) -> None:
 
     if message.from_user.id != int(CLOWN_ID):
         return
-    if is_censored_text(message.text):
-        return
     if await delete_won_dice(message):
         return
+    if is_censored_text(message.text):
+        await message.reply(
+            f"Реакция клоуна направлена исключительно  против пользователя {message.from_user.username}"
+        )
 
     logging.info(f"{message.from_user.id} is a clown")
     await message.react(emoji=CLOWN_FACE)
